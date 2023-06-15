@@ -20,27 +20,45 @@ model Home {
   price               Float
   land_size           Float
   propertyType        PropertyType
+  image               Image[]
+  realtor             User?        @relation(fields: [realtor_id], references: [id])
+  realtor_id          Int?
+  messages            Message[]
+  // messageId           Int
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String
-  phone      String
-  email      String
-  password   String
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
-  user_type  UserType
+  id               Int       @id @default(autoincrement())
+  name             String
+  phone            String
+  email            String
+  password         String
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @default(now())
+  user_type        UserType
+  homes            Home[]
+  buyer_messages   Message[] @relation("buyer_messages")
+  realtor_messages Message[] @relation("realtor_messages")
 }
 
 model Image {
-  id  Int    @id @default(autoincrement())
-  url String
+  id         Int      @id @default(autoincrement())
+  url        String
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  home_id    Int
+  home       Home     @relation(fields: [home_id], references: [id])
 }
 
 model Message {
-  id      Int    @id @default(autoincrement())
-  message String
+  id         Int    @id @default(autoincrement())
+  message    String
+  home       Home   @relation(fields: [home_id], references: [id])
+  home_id    Int
+  realtor_id Int
+  realtor    User   @relation("buyer_messages", fields: [realtor_id], references: [id])
+  buyer_id   Int
+  buyer      User   @relation("realtor_messages", fields: [buyer_id], references: [id])
 }
 
 enum PropertyType {
