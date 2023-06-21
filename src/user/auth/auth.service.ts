@@ -1,8 +1,9 @@
-import { Injectable, ConflictException, HttpException } from '@nestjs/common';
+import { Injectable, ConflictException, HttpException, Post } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/service/service.service';
 import * as bcrypt from "bcryptjs";
 import * as jwt from 'jsonwebtoken';
 import { User, UserType } from '@prisma/client'
+import { GenerateProductKeyDto } from '../dto/SignUp.dto';
 
 interface SignUpParams {
     email: string
@@ -20,7 +21,7 @@ interface SignInParams {
 @Injectable()
 export class AuthService {
     constructor(private readonly prismaService: PrismaService) { }
-    async SignUp({ email, password, name, phone }: SignUpParams) {
+    async SignUp({ email, password, name, phone }: SignUpParams,usertype:UserType) {
         const userExists = await this.prismaService.user.findFirst({
             where: {
                 email
@@ -38,10 +39,10 @@ export class AuthService {
                 name,
                 phone: String(phone),
                 password: hashedPassword,
-                user_type: UserType.BUYER
+                user_type: usertype
             }
         })
-        const token = await this.generateJWT(user.name,user.id)
+        const token = await this.generateJWT(user.name, user.id)
         // console.log(token)
         return token
     }
@@ -58,7 +59,6 @@ export class AuthService {
         }
 
         // console.log(password)
-
         const hashedPassword = (await user).password
 
         const isValidPassword = await bcrypt.compare(password, hashedPassword)
@@ -67,14 +67,22 @@ export class AuthService {
             throw new HttpException('Invalid Credentials', 400)
         }
 
-         return await this.generateJWT((await user).name,(await user).id)
+        return await this.generateJWT((await user).name, (await user).id)
     }
 
-    private async generateJWT(name:string,id:number){
+    private async generateJWT(name: string, id: number) {
         const token = await jwt.sign({
             name,
             id
         }, process.env.SECRET, { expiresIn: process.env.EXPIRES_IN })
         return token
     }
+
+    generateProductKey(email:string,userType:UserType){
+        const string = `${email}-${userType}-${process.env.PRODUCT_KEY_SECRET}`
+
+        return bcrypt.hash(string,10)
+    }
+
+   
 }
