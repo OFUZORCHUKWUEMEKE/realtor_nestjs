@@ -27,7 +27,6 @@ export class AuthController {
       return this.authService.SignUp(body,usertype)
     }
 
-
     @Post('/signin')
     SignIn(@Body() body:SignInDto){
        return this.authService.Signin(body)
