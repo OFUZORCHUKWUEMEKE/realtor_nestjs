@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable ,NotFoundException} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/service/service.service';
 import { HomeResponseDto } from './dto/home.dto';
 
@@ -31,8 +31,17 @@ export class HomeService {
             },
             where:filters
         })
-
-
+        if(!homes.length){
+            throw new NotFoundException()
+        }
         return homes.map((home) => new HomeResponseDto(home))
+    }
+
+    async getHomesById(id:number){
+        return this.prismaService.home.findFirst({
+            where:{
+                id
+            }
+        })
     }
 }
