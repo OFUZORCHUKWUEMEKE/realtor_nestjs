@@ -1,11 +1,11 @@
-import { Controller, Get, Query, Param, Post, Body } from '@nestjs/common';
+import { Controller, Get, Query, Param, Post, Body,ParseIntPipe ,Put,Delete} from '@nestjs/common';
 import { HomeService } from './home.service';
-import { CreateHomeDto, HomeResponseDto } from './dto/home.dto';
+import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from './dto/home.dto';
 import { PropertyType } from '@prisma/client';
 
 @Controller('home')
 export class HomeController {
-    constructor(private homeService: HomeService) { }
+    constructor(private homeService: HomeService) {}
 
     @Get('')
     async getHomes(
@@ -36,5 +36,16 @@ export class HomeController {
     @Post()
     createHome(@Body() body: CreateHomeDto) {
         return this.homeService.createHome(body)
+    }
+
+    @Put(':id')
+    updateHome(@Param('id',ParseIntPipe) id:number,
+    @Body() body:UpdateHomeDto){
+       return  this.homeService.updateHomeById(id,body)
+    }
+
+    @Delete(':id')
+    deleHome(@Param('id', ParseIntPipe) id){
+       return this.homeService.deleteHome(id)
     }
 }
