@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/service/service.service';
 import { HomeResponseDto } from './dto/home.dto';
 import { PropertyType } from '@prisma/client';
+import { User } from 'src/user/user.decorator';
 
 interface getHomesParam {
     city?: string;
@@ -11,26 +12,24 @@ interface getHomesParam {
     }
 }
 
-
 interface CreateHomeDto {
 
     address: string
 
     numberOfBedrooms: number
 
-
     numberOfBathrooms: number
 
     city: string
-
 
     price: number
 
     land_size: number
 
-
     propertyType: PropertyType
+
     images?: { url: string }[]
+
 }
 interface UpdateHomeDto {
 
@@ -38,25 +37,25 @@ interface UpdateHomeDto {
 
     numberOfBedrooms?: number
 
-
     numberOfBathrooms?: number
 
     city?: string
-
 
     price?: number
 
     land_size?: number
 
-
     propertyType?: PropertyType
+
     images?: { url: string }[]
+    
 }
 
 @Injectable()
 export class HomeService {
     constructor(private prismaService: PrismaService) { }
     async getHomes(filters: getHomesParam): Promise<HomeResponseDto[]> {
+        // console.log(user)
         const homes = await this.prismaService.home.findMany({
             select: {
                 id: true,
@@ -131,9 +130,11 @@ export class HomeService {
     }
 
     async deleteHome(id: number) {
+
         const home = await this.prismaService.home.findUnique({ where: { id } })
 
         await this.prismaService.image.deleteMany({ where: { home_id: home.id } })
+
         await this.prismaService.home.delete({ where: { id } })
 
         return 'Sussessfully Deleted Home'
